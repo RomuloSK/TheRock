@@ -81,3 +81,14 @@ per-kernel attribution of the remaining 13.9 ms vs ~7.6 ms floor is NOT establis
 Separate q/k/v + gate/up GEMVs: 8.63 ms/step (225 GB/s). Fused QKV and gate+up: 7.67 ms/step (253 GB/s): ~1 ms saved, ~7% of
 the 13.9 ms real graphed step. The remaining ~5 ms is unfused elementwise/norm/rotary/attention work in HF eager code; capturing
 it needs torch.compile (segfaults here, see above) or hand-written fused kernels. Neither is implemented; QKV fusion is not shipped.
+
+## torch.compile (default mode) + manual CUDA graph for decode (TinyLlama, fork profile + fast_linear)
+Inductor itself works on gfx1102 (`comp1.py`); the earlier segfault is specific to HF static cache + `mode="reduce-overhead"`.
+`hf_cg3.py COMPILE=1` compiles the decode step (default mode, fuses elementwise/norm/rotary), then captures it with `torch.cuda.graph`:
+| decode (ms/token, TinyLlama, 128 tokens) | ms |
+|---|---|
+| stock eager | 31.7 |
+| stock graphed | 20.9 |
+| fork graphed | 13.94 |
+| **fork compiled + graphed** | **10.99** (2 runs: 11.01, 10.99; 32 greedy tokens identical to uncompiled) |
+= 2.89x vs stock eager, 1.90x vs stock graphed. Floor from weights is ~7.6 ms. Compile warmup ~1 min per process; single-session timings.
