@@ -1,0 +1,36 @@
+{
+  "benchmark": "aa-gemm-long",
+  "cases": [
+    {
+      "case_id": "gemm-f16-2048",
+      "complete_pairs": 16,
+      "confidence_level": 0.95,
+      "gate": "target",
+      "geometric_mean_speedup": 0.9993568697126108,
+      "reason": "evidence does not establish a gain or material regression",
+      "speedup_ci": [
+        0.9966690107117459,
+        1.0020640547114987
+      ],
+      "status": "UNKNOWN",
+      "unit": "ms"
+    },
+    {
+      "case_id": "gemm-f16-skinny",
+      "complete_pairs": 16,
+      "confidence_level": 0.95,
+      "gate": "guard",
+      "geometric_mean_speedup": 0.9991288407570532,
+      "reason": "lower confidence bound stays within 1.03x regression limit",
+      "speedup_ci": [
+        0.9947332596001561,
+        1.0034140138319914
+      ],
+      "status": "PASS",
+      "unit": "ms"
+    }
+  ],
+  "overall_status": "UNKNOWN",
+  "schema_version": 1,
+  "spec_sha256": "f4f6b9fff00aed2679995fb4fb1d8681311cea453fd2b06d3670f700c74f93e0"
+}

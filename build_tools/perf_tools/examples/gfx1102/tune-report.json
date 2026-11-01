@@ -1,0 +1,78 @@
+{
+  "benchmark": "tunableop-vs-default",
+  "cases": [
+    {
+      "case_id": "f16-cube2048",
+      "complete_pairs": 10,
+      "confidence_level": 0.95,
+      "gate": "target",
+      "geometric_mean_speedup": 1.0856834344797204,
+      "reason": "lower confidence bound meets 1.03x target",
+      "speedup_ci": [
+        1.0788216509868478,
+        1.0924450082686437
+      ],
+      "status": "PASS",
+      "unit": "ms"
+    },
+    {
+      "case_id": "f16-skinny16",
+      "complete_pairs": 10,
+      "confidence_level": 0.95,
+      "gate": "target",
+      "geometric_mean_speedup": 1.8255829008805573,
+      "reason": "lower confidence bound meets 1.03x target",
+      "speedup_ci": [
+        1.778724541223773,
+        1.8697999860157428
+      ],
+      "status": "PASS",
+      "unit": "ms"
+    },
+    {
+      "case_id": "f16-decode1",
+      "complete_pairs": 10,
+      "confidence_level": 0.95,
+      "gate": "target",
+      "geometric_mean_speedup": 0.9988975269010198,
+      "reason": "evidence does not establish a gain or material regression",
+      "speedup_ci": [
+        0.9980092228629571,
+        0.9997316687315393
+      ],
+      "status": "UNKNOWN",
+      "unit": "ms"
+    },
+    {
+      "case_id": "f16-m512",
+      "complete_pairs": 10,
+      "confidence_level": 0.95,
+      "gate": "target",
+      "geometric_mean_speedup": 1.0049216935302123,
+      "reason": "evidence does not establish a gain or material regression",
+      "speedup_ci": [
+        1.0001481023061278,
+        1.0093342067621052
+      ],
+      "status": "UNKNOWN",
+      "unit": "ms"
+    },
+    {
+      "case_id": "f16-cube4096",
+      "complete_pairs": 10,
+      "confidence_level": 0.95,
+      "gate": "target",
+      "geometric_mean_speedup": 1.0193450651233837,
+      "reason": "evidence does not establish a gain or material regression",
+      "speedup_ci": [
+        1.0169942270926646,
+        1.021940609228853
+      ],
+      "status": "UNKNOWN",
+      "unit": "ms"
+    }
+  ],
+  "overall_status": "UNKNOWN",
+  "schema_version": 1,
+  "spec_sha256": "eaa34f0dac736d66a23dd56e1e9de03157ecee65c3ef84b6c13264806ba4a7c8"
+}

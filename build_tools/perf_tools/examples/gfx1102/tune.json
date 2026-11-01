@@ -1,0 +1,366 @@
+{
+ "schema_version": 1,
+ "benchmark": "tunableop-vs-default",
+ "pairs": 10,
+ "minimum_pairs": 10,
+ "warmups": 1,
+ "seed": 5,
+ "timeout_seconds": 600,
+ "confidence_level": 0.95,
+ "bootstrap_samples": 5000,
+ "minimum_speedup": 1.03,
+ "maximum_regression": 1.03,
+ "working_directory": ".",
+ "record_environment": [
+  "PYTORCH_TUNABLEOP_ENABLED"
+ ],
+ "context": {
+  "gpu_target": "gfx1102",
+  "rocm": "10.1.0",
+  "torch": "2.14.0+rocm10.1.0",
+  "tuning_file": "tunable_0.csv"
+ },
+ "environment": {},
+ "cases": [
+  {
+   "id": "f16-cube2048",
+   "gate": "target",
+   "direction": "lower",
+   "unit": "ms",
+   "metric": {
+    "source": "json_stdout",
+    "field": "latency_ms"
+   },
+   "baseline": {
+    "command": [
+     "python",
+     "gemm_bench.py",
+     "--m",
+     "2048",
+     "--n",
+     "2048",
+     "--k",
+     "2048",
+     "--iters",
+     "300"
+    ],
+    "correctness_command": [
+     "python",
+     "gemm_bench.py",
+     "--check",
+     "--m",
+     "2048",
+     "--n",
+     "2048",
+     "--k",
+     "2048"
+    ],
+    "environment": {
+     "PYTORCH_TUNABLEOP_ENABLED": "0"
+    }
+   },
+   "candidate": {
+    "command": [
+     "python",
+     "gemm_bench.py",
+     "--m",
+     "2048",
+     "--n",
+     "2048",
+     "--k",
+     "2048",
+     "--iters",
+     "300"
+    ],
+    "correctness_command": [
+     "python",
+     "gemm_bench.py",
+     "--check",
+     "--m",
+     "2048",
+     "--n",
+     "2048",
+     "--k",
+     "2048"
+    ],
+    "environment": {
+     "PYTORCH_TUNABLEOP_ENABLED": "1",
+     "PYTORCH_TUNABLEOP_TUNING": "0",
+     "PYTORCH_TUNABLEOP_FILENAME": "tunable_%d.csv"
+    }
+   }
+  },
+  {
+   "id": "f16-skinny16",
+   "gate": "target",
+   "direction": "lower",
+   "unit": "ms",
+   "metric": {
+    "source": "json_stdout",
+    "field": "latency_ms"
+   },
+   "baseline": {
+    "command": [
+     "python",
+     "gemm_bench.py",
+     "--m",
+     "16",
+     "--n",
+     "4096",
+     "--k",
+     "4096",
+     "--iters",
+     "3000"
+    ],
+    "correctness_command": [
+     "python",
+     "gemm_bench.py",
+     "--check",
+     "--m",
+     "16",
+     "--n",
+     "4096",
+     "--k",
+     "4096"
+    ],
+    "environment": {
+     "PYTORCH_TUNABLEOP_ENABLED": "0"
+    }
+   },
+   "candidate": {
+    "command": [
+     "python",
+     "gemm_bench.py",
+     "--m",
+     "16",
+     "--n",
+     "4096",
+     "--k",
+     "4096",
+     "--iters",
+     "3000"
+    ],
+    "correctness_command": [
+     "python",
+     "gemm_bench.py",
+     "--check",
+     "--m",
+     "16",
+     "--n",
+     "4096",
+     "--k",
+     "4096"
+    ],
+    "environment": {
+     "PYTORCH_TUNABLEOP_ENABLED": "1",
+     "PYTORCH_TUNABLEOP_TUNING": "0",
+     "PYTORCH_TUNABLEOP_FILENAME": "tunable_%d.csv"
+    }
+   }
+  },
+  {
+   "id": "f16-decode1",
+   "gate": "target",
+   "direction": "lower",
+   "unit": "ms",
+   "metric": {
+    "source": "json_stdout",
+    "field": "latency_ms"
+   },
+   "baseline": {
+    "command": [
+     "python",
+     "gemm_bench.py",
+     "--m",
+     "1",
+     "--n",
+     "11008",
+     "--k",
+     "4096",
+     "--iters",
+     "3000"
+    ],
+    "correctness_command": [
+     "python",
+     "gemm_bench.py",
+     "--check",
+     "--m",
+     "1",
+     "--n",
+     "11008",
+     "--k",
+     "4096"
+    ],
+    "environment": {
+     "PYTORCH_TUNABLEOP_ENABLED": "0"
+    }
+   },
+   "candidate": {
+    "command": [
+     "python",
+     "gemm_bench.py",
+     "--m",
+     "1",
+     "--n",
+     "11008",
+     "--k",
+     "4096",
+     "--iters",
+     "3000"
+    ],
+    "correctness_command": [
+     "python",
+     "gemm_bench.py",
+     "--check",
+     "--m",
+     "1",
+     "--n",
+     "11008",
+     "--k",
+     "4096"
+    ],
+    "environment": {
+     "PYTORCH_TUNABLEOP_ENABLED": "1",
+     "PYTORCH_TUNABLEOP_TUNING": "0",
+     "PYTORCH_TUNABLEOP_FILENAME": "tunable_%d.csv"
+    }
+   }
+  },
+  {
+   "id": "f16-m512",
+   "gate": "target",
+   "direction": "lower",
+   "unit": "ms",
+   "metric": {
+    "source": "json_stdout",
+    "field": "latency_ms"
+   },
+   "baseline": {
+    "command": [
+     "python",
+     "gemm_bench.py",
+     "--m",
+     "512",
+     "--n",
+     "4096",
+     "--k",
+     "4096",
+     "--iters",
+     "300"
+    ],
+    "correctness_command": [
+     "python",
+     "gemm_bench.py",
+     "--check",
+     "--m",
+     "512",
+     "--n",
+     "4096",
+     "--k",
+     "4096"
+    ],
+    "environment": {
+     "PYTORCH_TUNABLEOP_ENABLED": "0"
+    }
+   },
+   "candidate": {
+    "command": [
+     "python",
+     "gemm_bench.py",
+     "--m",
+     "512",
+     "--n",
+     "4096",
+     "--k",
+     "4096",
+     "--iters",
+     "300"
+    ],
+    "correctness_command": [
+     "python",
+     "gemm_bench.py",
+     "--check",
+     "--m",
+     "512",
+     "--n",
+     "4096",
+     "--k",
+     "4096"
+    ],
+    "environment": {
+     "PYTORCH_TUNABLEOP_ENABLED": "1",
+     "PYTORCH_TUNABLEOP_TUNING": "0",
+     "PYTORCH_TUNABLEOP_FILENAME": "tunable_%d.csv"
+    }
+   }
+  },
+  {
+   "id": "f16-cube4096",
+   "gate": "target",
+   "direction": "lower",
+   "unit": "ms",
+   "metric": {
+    "source": "json_stdout",
+    "field": "latency_ms"
+   },
+   "baseline": {
+    "command": [
+     "python",
+     "gemm_bench.py",
+     "--m",
+     "4096",
+     "--n",
+     "4096",
+     "--k",
+     "4096",
+     "--iters",
+     "300"
+    ],
+    "correctness_command": [
+     "python",
+     "gemm_bench.py",
+     "--check",
+     "--m",
+     "4096",
+     "--n",
+     "4096",
+     "--k",
+     "4096"
+    ],
+    "environment": {
+     "PYTORCH_TUNABLEOP_ENABLED": "0"
+    }
+   },
+   "candidate": {
+    "command": [
+     "python",
+     "gemm_bench.py",
+     "--m",
+     "4096",
+     "--n",
+     "4096",
+     "--k",
+     "4096",
+     "--iters",
+     "300"
+    ],
+    "correctness_command": [
+     "python",
+     "gemm_bench.py",
+     "--check",
+     "--m",
+     "4096",
+     "--n",
+     "4096",
+     "--k",
+     "4096"
+    ],
+    "environment": {
+     "PYTORCH_TUNABLEOP_ENABLED": "1",
+     "PYTORCH_TUNABLEOP_TUNING": "0",
+     "PYTORCH_TUNABLEOP_FILENAME": "tunable_%d.csv"
+    }
+   }
+  }
+ ]
+}
