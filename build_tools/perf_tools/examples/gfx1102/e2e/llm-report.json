@@ -1,0 +1,36 @@
+{
+  "benchmark": "llm-stock-vs-profile",
+  "cases": [
+    {
+      "case_id": "prefill-2048",
+      "complete_pairs": 10,
+      "confidence_level": 0.95,
+      "gate": "target",
+      "geometric_mean_speedup": 3.0398199160023744,
+      "reason": "lower confidence bound meets 1.03x target",
+      "speedup_ci": [
+        3.0351748609130564,
+        3.0444392983769863
+      ],
+      "status": "PASS",
+      "unit": "ms"
+    },
+    {
+      "case_id": "decode-64tok",
+      "complete_pairs": 10,
+      "confidence_level": 0.95,
+      "gate": "target",
+      "geometric_mean_speedup": 1.4533096650936035,
+      "reason": "lower confidence bound meets 1.03x target",
+      "speedup_ci": [
+        1.451806104794552,
+        1.454914512267278
+      ],
+      "status": "PASS",
+      "unit": "ms"
+    }
+  ],
+  "overall_status": "PASS",
+  "schema_version": 1,
+  "spec_sha256": "0a3bb102acda2b1d79c6895465e1edd023234fa2fb815621647b0c7ef75ca4ea"
+}

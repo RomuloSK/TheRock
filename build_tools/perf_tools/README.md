@@ -15,6 +15,10 @@ one JSON object on stdout and select a positive numeric field with
 example, using synchronized HIP events); validate its timing method separately.
 Send verbose diagnostics to stderr.
 
+## Runtime profile
+
+`rocm_perf_profile.py -- <command>` enables fused attention on gfx11 for stock PyTorch wheels (see `examples/gfx1102/e2e/RESULTS.md`: 3.0x prefill, 1.45x decode on RX 7600). `--dry-run` shows what it would set; `ROCM_PERF_PROFILE=0` disables it.
+
 ## Spec
 
 ```json
