@@ -1,0 +1,68 @@
+[
+ {
+  "case": "short",
+  "rep": 0,
+  "wall_s": 6.97,
+  "prompt_n": 73,
+  "prompt_tps": 27.4,
+  "pred_n": 115,
+  "pred_tps": 26.7,
+  "text_sha": "e0d792d309",
+  "text": "We need to respond to user: \"[request short-0] Write a short paragraph explaining what a GPU does and why memory bandwidth matters.\" Need final short paragraph. Keep concise.\n||A GPU is a specialized processor designed to perform many calculations in parallel, especially for graphics, video, machine learning, and other data-intensive tasks. Memory bandwidth matters because a GPU can only process data as fast as it can receive it from memory; if bandwidth is too low, the GPU may sit idle waiting for data, limiting overall performance even if it has many powerful cores."
+ },
+ {
+  "case": "short",
+  "rep": 1,
+  "wall_s": 6.76,
+  "prompt_n": 73,
+  "prompt_tps": 28.5,
+  "pred_n": 113,
+  "pred_tps": 26.9,
+  "text_sha": "5945d138bd",
+  "text": "We need to respond to user: \"[request short-1] Write a short paragraph explaining what a GPU does and why memory bandwidth matters.\" Need final short paragraph. Keep concise.\n||A GPU is a specialized processor designed to perform many calculations in parallel, especially for graphics, machine learning, and other data-intensive tasks. Memory bandwidth matters because a GPU can only process data as fast as it can receive it from memory; if bandwidth is too low, the GPU may sit idle waiting for data, limiting overall performance even when it has strong computing power."
+ },
+ {
+  "case": "medium",
+  "rep": 0,
+  "wall_s": 24.32,
+  "prompt_n": 1890,
+  "prompt_tps": 103.4,
+  "pred_n": 160,
+  "pred_tps": 26.6,
+  "text_sha": "7b45bd04dd",
+  "text": "We need answer user's request: \"Summarize the text above in five bullet points.\" Need produce final with five bullets. Need likely concise. Need ensure exactly five bullet points. Analyze content: TheRock testing overview. Need summarize in five bullets. Include testing layers, categories, feature areas, subprojects, CI/local, limitations? Let's craft five bullets.\n\nNeed maybe mention: TheRock is integration point for ROCm Core SDK build/test/packaging/release, aims ready to release, tests detect issues early and scale across broad surface. Testing layers: pre-commit/static, unit, integration, with target runtimes and CI workflows, local and CI. Feature areas: CMake super-project, GitHub Actions, Python tools, packaging, each with design/testing approaches. ROCm sub||"
+ },
+ {
+  "case": "medium",
+  "rep": 1,
+  "wall_s": 24.52,
+  "prompt_n": 1890,
+  "prompt_tps": 103.5,
+  "pred_n": 160,
+  "pred_tps": 25.6,
+  "text_sha": "c561fdf908",
+  "text": "We need answer user's request: \"Summarize the text above in five bullet points.\" Need produce final with five bullets. Need likely concise. Need ensure exactly five bullet points. Analyze content: TheRock testing overview. Need summarize key points: TheRock integration point for ROCm Core SDK build/test/packaging/release, aims ready to release, testing layers by cost/confidence, categories pre-commit/unit/integration with runtimes and CI, feature areas CMake/GHA/Python/packaging, testing subprojects via TheRock. Need five bullets. Maybe include: purpose, scaling/layering, categories, feature areas, subproject testing. Ensure no markdown table. Final in English.\n||- TheRock is the integration point for ROCm Core SDK build, test"
+ },
+ {
+  "case": "long",
+  "rep": 0,
+  "wall_s": 96.41,
+  "prompt_n": 9412,
+  "prompt_tps": 101.5,
+  "pred_n": 96,
+  "pred_tps": 26.2,
+  "text_sha": "97fd1a6666",
+  "text": "We need answer user's request: \"Summarize the text above in five bullet points.\" Need produce final with five bullets. Need analyze content. Long text about Testing in TheRock and Releases. Need summarize in five bullet points. Need likely cover testing layers, categories, feature areas, subprojects, releases/installation. Need concise but enough. Ensure exactly five bullet points. Let's craft.\n\nNeed maybe mention TheRock integration, testing categories, feature areas, subproject||"
+ },
+ {
+  "case": "long",
+  "rep": 1,
+  "wall_s": 96.02,
+  "prompt_n": 9412,
+  "prompt_tps": 101.6,
+  "pred_n": 96,
+  "pred_tps": 28.3,
+  "text_sha": "eb1033e294",
+  "text": "We need answer user's request: \"Summarize the text above in five bullet points.\" Need produce final with five bullets. Need analyze content. Long text about Testing in TheRock and Releases. Need summarize in five bullet points. Need likely cover testing layers, categories, feature areas, subproject testing, releases/installation. Need concise but enough. Ensure exactly five bullet points. Let's craft.\n\nNeed maybe mention TheRock integration, test categories, feature areas, sub||"
+ }
+]

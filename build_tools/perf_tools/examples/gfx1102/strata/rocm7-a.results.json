@@ -1,0 +1,68 @@
+[
+ {
+  "case": "short",
+  "rep": 0,
+  "wall_s": 6.94,
+  "prompt_n": 73,
+  "prompt_tps": 29.2,
+  "pred_n": 116,
+  "pred_tps": 26.2,
+  "text_sha": "b9deb1df45",
+  "text": "We need to respond to user: \"[request short-0] Write a short paragraph explaining what a GPU does and why memory bandwidth matters.\" Need final short paragraph. Keep concise.\n||A GPU is a specialized processor designed to perform many calculations in parallel, especially for graphics, video, machine learning, and other data-intensive tasks. Memory bandwidth matters because a GPU can only process data as fast as it can receive it from memory; if bandwidth is too low, the GPU may sit idle waiting for data, limiting overall performance even when it has plenty of computing power."
+ },
+ {
+  "case": "short",
+  "rep": 1,
+  "wall_s": 8.21,
+  "prompt_n": 73,
+  "prompt_tps": 29.3,
+  "pred_n": 143,
+  "pred_tps": 25.0,
+  "text_sha": "16862b8283",
+  "text": "We need to respond to user: \"[request short-1] Write a short paragraph explaining what a GPU does and why memory bandwidth matters.\" Need final short paragraph. Simple.\n||A GPU is a specialized processor designed to perform many calculations in parallel, especially for graphics, video, machine learning, and other data-intensive tasks. Instead of handling one operation at a time like a typical CPU, a GPU can process many operations simultaneously, making it much faster for certain workloads. Memory bandwidth matters because a GPU can only perform calculations as fast as it can receive data from memory. If bandwidth is low, the GPU may sit idle waiting for data, limiting overall performance even if it has many powerful cores."
+ },
+ {
+  "case": "medium",
+  "rep": 0,
+  "wall_s": 24.75,
+  "prompt_n": 1890,
+  "prompt_tps": 104.2,
+  "pred_n": 160,
+  "pred_tps": 24.2,
+  "text_sha": "5305d5235f",
+  "text": "We need answer user's request: \"Summarize the text above in five bullet points.\" Need produce final with five bullets. Need likely English. Need concise but cover main points. Let's analyze text: It's about testing in TheRock, ROCm integration point. Testing layers: pre-commit/static, unit, integration; CI workflows; feature areas: CMake super-project, GitHub Actions, Python scripts/tools, packaging; testing ROCm subprojects via TheRock. Need five bullet points. Ensure exactly five bullets. Could include: TheRock purpose and testing goal; test categories and CI; feature areas; subproject testing; scalability/accessibility/limitations. Need maybe mention known limitations? Text truncated but enough. Let's craft five bullets.\n||- TheRock is the ROCm"
+ },
+ {
+  "case": "medium",
+  "rep": 1,
+  "wall_s": 24.69,
+  "prompt_n": 1890,
+  "prompt_tps": 104.3,
+  "pred_n": 160,
+  "pred_tps": 24.4,
+  "text_sha": "65add148f2",
+  "text": "We need answer user's request: \"Summarize the text above in five bullet points.\" Need produce final with five bullets. Need likely concise. Need ensure five bullet points. Let's analyze text: It's about Testing in TheRock. Need summarize in five bullets. Include key points: TheRock integration point for ROCm Core SDK build/test/packaging/release, aims ready to release, testing layers by cost/confidence, categories pre-commit/static, unit, integration, feature areas CMake/GHA/Python/packaging, testing ROCm subprojects via TheRock. Need five bullets.\n\nNeed maybe mention local dev and CI, broad support surface, 40+ subprojects 25+ GPU targets, presubmit fast high-signal, nightly/scheduled/on-demand||"
+ },
+ {
+  "case": "long",
+  "rep": 0,
+  "wall_s": 95.69,
+  "prompt_n": 9412,
+  "prompt_tps": 102.7,
+  "pred_n": 96,
+  "pred_tps": 23.7,
+  "text_sha": "c334c36cce",
+  "text": "We need answer user's request: \"Summarize the text above in five bullet points.\" Need produce final with five bullets. Need analyze content. Long text about Testing in TheRock and Releases. Need summarize in five bullet points. Need likely cover main ideas: TheRock as integration/testing infrastructure, test categories and CI layers, feature areas testing (CMake, workflows, Python, packaging), testing ROCm subprojects via TheRock, releases/multi-arch packages installation and||"
+ },
+ {
+  "case": "long",
+  "rep": 1,
+  "wall_s": 95.44,
+  "prompt_n": 9412,
+  "prompt_tps": 102.5,
+  "pred_n": 96,
+  "pred_tps": 26.4,
+  "text_sha": "97fd1a6666",
+  "text": "We need answer user's request: \"Summarize the text above in five bullet points.\" Need produce final with five bullets. Need analyze content. Long text about Testing in TheRock and Releases. Need summarize in five bullet points. Need likely cover testing layers, categories, feature areas, subprojects, releases/installation. Need concise but enough. Ensure exactly five bullet points. Let's craft.\n\nNeed maybe mention TheRock integration, testing categories, feature areas, subproject||"
+ }
+]
