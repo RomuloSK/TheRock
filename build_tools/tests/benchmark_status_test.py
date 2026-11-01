@@ -30,11 +30,24 @@ prettytable_stub.PrettyTable = object
 extended_test_base_stub = types.ModuleType("utils.extended_test_base")
 extended_test_base_stub.ExtendedTestBase = type("ExtendedTestBase", (), {})
 extended_test_base_stub.gha_append_step_summary = lambda _summary: None
+# utils/__init__ eagerly imports the whole results/config stack (jsonschema, requests,
+# prettytable, ...). Register a stub package that has the real __path__ but never runs
+# that __init__, so `utils.logger` still resolves and this test needs only the stdlib.
+previous_utils_module = sys.modules.get("utils", missing)
+if previous_utils_module is missing:
+    utils_stub = types.ModuleType("utils")
+    utils_stub.__path__ = [str(EXTENDED_TESTS / "utils")]
+    sys.modules["utils"] = utils_stub
 sys.modules["prettytable"] = prettytable_stub
 sys.modules["utils.extended_test_base"] = extended_test_base_stub
 try:
     from benchmark_base import BenchmarkBase  # noqa: E402
 finally:
+    if previous_utils_module is missing:
+        for name in [m for m in sys.modules if m == "utils" or m.startswith("utils.")]:
+            if name != "utils.logger":  # BenchmarkBase keeps its imported logger reference
+                sys.modules.pop(name, None)
+        sys.modules.pop("utils", None)
     if previous_prettytable is missing:
         sys.modules.pop("prettytable", None)
     else:
