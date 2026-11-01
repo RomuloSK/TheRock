@@ -19,3 +19,14 @@ user setting. No library was rebuilt: the fork's contribution is the detection, 
   a better M=1 GEMV kernel (rocBLAS) is the next real library-level candidate, ~1.3x on decode if it reached roofline. Not started.
 - `TORCH_BLAS_PREFER_HIPBLASLT` 0/1: no difference on this card (checked 2048^3, 512/64x4096x4096, 4096^3).
 Limits: random weights, one model shape, one GPU, forward only (no backward/training), experimental AOTriton kernels.
+
+## Safety validation of the fused-attention profile (added)
+`attn_matrix.py` (forward + backward vs fp64 reference, `attn_matrix.json`), `attn_dispatch.py`, `train_check.py`.
+- 10 configs: MHA causal/non-causal, odd length (1000), GQA 4:1, MQA decode, bool and float masks, head dim 80, bf16, q_len != kv_len.
+  Fused fwd/dQ/dK/dV errors vs fp64 are <= ~1e-3 in fp16 (4e-3 bf16), 1-3x the unfused fp16 error; all finite.
+- Some combinations are unsupported by one fused backend (FLASH: bool/float mask, q!=kv causal; EFFICIENT: GQA); the
+  default dispatcher falls through to a supported backend. Confirmed for GQA+mask, q!=kv causal, bool mask, dropout 0.1,
+  fully-masked row, length 1: all complete with finite outputs and gradients, with the flag on and off.
+- Training smoke (4-layer d512, AdamW, autocast fp16, 60 steps): loss 7.7845 -> 4.8680 (stock) vs 4.8689 (profile);
+  step time 90.6 ms -> 50.3 ms (1.8x, single run).
+Not covered: dropout statistics, long-context (>8k) numerics, multi-epoch convergence, other gfx11 parts (only gfx1102 tested).
