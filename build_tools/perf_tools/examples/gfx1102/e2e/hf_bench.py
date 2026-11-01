@@ -1,8 +1,8 @@
 import os, sys, json, time, torch
 sys.path.insert(0,'/home/romuloborges/projects/ROCm/therock-perf-implementation/build_tools/perf_tools')
 from transformers import AutoTokenizer, AutoModelForCausalLM
-name="TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-tok=AutoTokenizer.from_pretrained(name); m=AutoModelForCausalLM.from_pretrained(name,torch_dtype=torch.float16,attn_implementation="sdpa").cuda().eval()
+name=os.environ.get("MODEL","TinyLlama/TinyLlama-1.1B-Chat-v1.0")
+tok=AutoTokenizer.from_pretrained(name); m=AutoModelForCausalLM.from_pretrained(name,dtype=getattr(torch,os.environ.get("DT","float16")),attn_implementation="sdpa").cuda().eval()
 if os.environ.get("FAST_LINEAR")=="1":
     from fast_linear import convert; convert(m)
 text=("The history of computing is a story of abstraction layers. "*400)

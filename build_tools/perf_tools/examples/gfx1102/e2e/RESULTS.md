@@ -66,3 +66,13 @@ loss on repeated text 0.03640 vs 0.03641; generated paragraph identical; 64 gree
    index_copy_ graph, then eager GEMM / SDPA, then replay) does NOT fault, so this is UNPROVEN as a stack bug and may be misuse of
    HF's cache API in `hf_cg.py` (e.g. host-side cache state across capture). Not reported upstream; needs root-causing first.
 Note: fast_linear copies the weight, so models with tied embeddings (e.g. Qwen) keep one extra copy of the head; TinyLlama is untied.
+
+## Second checkpoint: Qwen2.5-0.5B-Instruct (tied embeddings, QKV bias, GQA 14/2, head dim 64), single-session timings
+(`MODEL=Qwen/Qwen2.5-0.5B-Instruct DT=float16|bfloat16`, `hf_bench.py`, `ppl.py`; stock = `ROCM_PERF_PROFILE=0`)
+| dtype | prefill stock -> fork | decode eager stock -> fork | ppl stock / fork (16k tokens) |
+|---|---|---|---|
+| fp16 | 399.1 -> 103.5 ms (**3.86x**) | 37.3 -> 26.3 ms/token (**1.42x**) | 7.03619 / 7.03653 (4.8e-5 rel) |
+| bf16 | 402.0 -> 109.8 ms (**3.66x**) | 37.6 -> 26.4 ms/token (**1.42x**) | 7.04462 / 7.04417 (6.4e-5 rel) |
+Tied embeddings: fast_linear replaces the shared head with a transposed copy (about +136M params of memory for this model).
+Graphed-decode profile attempt: torch profiler/CUPTI under graph replay reported only ~83 of ~155 GEMV launches per step, so
+per-kernel attribution of the remaining 13.9 ms vs ~7.6 ms floor is NOT established; fusing QKV / gate-up GEMVs is an untested idea.

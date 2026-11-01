@@ -1,8 +1,8 @@
 import os, sys, json, torch
 sys.path.insert(0,'/home/romuloborges/projects/ROCm/therock-perf-implementation/build_tools/perf_tools')
 from transformers import AutoTokenizer, AutoModelForCausalLM
-name="TinyLlama/TinyLlama-1.1B-Chat-v1.0"; R="/home/romuloborges/projects/ROCm/therock-perf-implementation/"
-tok=AutoTokenizer.from_pretrained(name); m=AutoModelForCausalLM.from_pretrained(name,torch_dtype=torch.float16,attn_implementation="sdpa").cuda().eval()
+name=os.environ.get("MODEL","TinyLlama/TinyLlama-1.1B-Chat-v1.0"); R="/home/romuloborges/projects/ROCm/therock-perf-implementation/"
+tok=AutoTokenizer.from_pretrained(name); m=AutoModelForCausalLM.from_pretrained(name,dtype=getattr(torch,os.environ.get("DT","float16")),attn_implementation="sdpa").cuda().eval()
 if os.environ.get("FAST_LINEAR")=="1":
     from fast_linear import convert; convert(m)
 text=open(R+"TESTING.md").read()+open(R+"RELEASES.md").read()+open(R+"README.md").read()
