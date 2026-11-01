@@ -1,13 +1,15 @@
 import os, sys, time, json, torch
 sys.path.insert(0,'/home/romuloborges/projects/ROCm/therock-perf-implementation/build_tools/perf_tools')
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from fast_linear import convert; from fast_decode import GraphedDecoder; from fast_tune import tune_decode, load_tuning
+from fast_linear import convert, fuse_projections; from fast_decode import GraphedDecoder; from fast_tune import tune_decode, load_tuning
 name=os.environ.get("MODEL","TinyLlama/TinyLlama-1.1B-Chat-v1.0"); TUNE=os.environ.get("TUNE","0")=="1"
 tok=AutoTokenizer.from_pretrained(name); m=AutoModelForCausalLM.from_pretrained(name,dtype=torch.float16,attn_implementation="sdpa").cuda().eval()
 base=tok("The history of computing is a story of abstraction layers. "*100,return_tensors="pt").input_ids[:,:512].cuda()
-convert(m); f=os.environ.get("TFILE","/tmp/tune_%s.csv"%name.split("/")[-1])
+convert(m)
+if os.environ.get('FUSE')=='1': fuse_projections(m)
+f=os.environ.get("TFILE","/tmp/tune_%s%s.csv"%(name.split("/")[-1],"_fused" if os.environ.get("FUSE")=="1" else ""))
 if TUNE and not os.path.exists(f):
-    t0=time.perf_counter(); tune_decode(m,(1,2,4,8),f); print("tuned in %.0fs, %d lines"%(time.perf_counter()-t0,sum(1 for _ in open(f))),file=sys.stderr)
+    t0=time.perf_counter(); tune_decode(m,tuple(int(x) for x in os.environ.get("TB","1,2,4,8").split(",")),f); print("tuned in %.0fs, %d lines"%(time.perf_counter()-t0,sum(1 for _ in open(f))),file=sys.stderr)
     pass
 if TUNE: load_tuning(f)
 import faulthandler; faulthandler.dump_traceback_later(420,exit=True)

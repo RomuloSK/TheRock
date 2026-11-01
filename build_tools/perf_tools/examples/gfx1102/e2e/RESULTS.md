@@ -140,3 +140,27 @@ A TunableOp-selected hipBLASLt GEMM warmed up on a stream, then captured with th
 Line 169 is the `hipMalloc` in hipBLASLt's handle-creation code (the source comment says handle creation allocates so the matmul path never does). Handles are
 created per stream, and `torch.cuda.graph` captures on a fresh private stream. Workaround (used by `GraphedDecoder`): warm up and capture on the SAME stream
 (`torch.cuda.graph(g, stream=s)`, `lt_capture.py same_stream_warm_and_capture`). Not yet reported upstream; an error that hangs instead of failing is worth reporting.
+
+## Projection fusion (`fast_linear.fuse_projections`) and the best decode configuration
+Profile of the Qwen2.5-0.5B B=1 graphed step (`prof_run.py` under `rocprofv3 --kernel-trace`, kernels from the sqlite results db): rocBLAS `gemvn` kernels are ~62%
+of kernel time (~4.5 ms/step, ~217 GB/s average vs ~253 achievable), attention ~0.7 ms/step (avg 28.7 us per call; the KV cache is tiny, so it is latency-bound),
+the compiled elementwise Triton kernels are 1-3 us each, and ~1 ms/step is gaps between kernels. The `gemvn<32,16>` kernels average 18 us (the small k/v projections).
+`fuse_projections(model)` (call after `convert`) turns q/k/v and gate/up into one GEMM each (7 -> 4 GEMVs per layer). Unit tests: 4 new, 10 in `fast_linear_test`.
+Effect at B=1 (single session, untuned): TinyLlama 10.90 -> 9.97 ms (1.09x), Qwen2.5-0.5B 6.71 -> 5.98 ms (1.12x). Tokens identical to HF at B=1/2/4 with fusion (eager-free:
+compile + graph, tuned and untuned).
+
+Best configuration per batch (ms/step; tok/s) vs stock HF `generate` with fused attention already on (the stock column of the table above):
+| model | B | stock | fork best | speedup | best uses |
+|---|---|---|---|---|---|
+| TinyLlama | 1 | 23.5 (43) | 9.97 (100) | 2.4x | fusion, no tuning |
+| TinyLlama | 2 | 28.0 (72) | 11.6 (173) | 2.4x | fusion + tuning |
+| TinyLlama | 4 | 27.9 (144) | 13.3 (302) | 2.1x | fusion + tuning |
+| TinyLlama | 8 | 27.8 (288) | 18.6 (430) | 1.5x | fusion + tuning |
+| Qwen2.5-0.5B | 1 | 27.4 (37) | 5.98 (167) | 4.6x | fusion, no tuning |
+| Qwen2.5-0.5B | 2 | 30.3 (66) | 7.04 (284) | 4.3x | fusion + tuning |
+| Qwen2.5-0.5B | 4 | 30.8 (130) | 8.64 (463) | 3.6x | fusion + tuning |
+| Qwen2.5-0.5B | 8 | 31.0 (258) | 10.05 (796) | 3.1x | fusion + tuning |
+Versus true stock (fused attention off, B=1): TinyLlama 31.7 -> 9.97 ms (3.2x); Qwen 37.3 -> 5.98 ms (6.2x).
+Rule: enable TunableOp tuning only when serving B >= 2. With tuning loaded, B=1 is ~3% slower (Qwen 5.98 -> 6.15 ms) even when no B=1 entries were tuned
+(tuning only B=2,4,8 gave 6.15 ms), i.e. enabling TunableOp changes the default path of untuned M=1 GEMMs; cause not investigated.
+Remaining B=1 gap to the weight-read floor (TinyLlama ~7.6 ms, Qwen ~3.9 ms at 253 GB/s): attention latency (~0.7 ms), kernel gaps (~1 ms), GEMV efficiency (~217 vs 253 GB/s).
