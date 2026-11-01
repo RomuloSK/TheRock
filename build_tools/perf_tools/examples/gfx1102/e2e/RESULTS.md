@@ -76,3 +76,8 @@ Note: fast_linear copies the weight, so models with tied embeddings (e.g. Qwen) 
 Tied embeddings: fast_linear replaces the shared head with a transposed copy (about +136M params of memory for this model).
 Graphed-decode profile attempt: torch profiler/CUPTI under graph replay reported only ~83 of ~155 GEMV launches per step, so
 per-kernel attribution of the remaining 13.9 ms vs ~7.6 ms floor is NOT established; fusing QKV / gate-up GEMVs is an untested idea.
+
+## Decode headroom analysis (synthetic, TinyLlama shapes: 22 layers, d=2048, kv=256, ffn=5632, graphed, cold weights)
+Separate q/k/v + gate/up GEMVs: 8.63 ms/step (225 GB/s). Fused QKV and gate+up: 7.67 ms/step (253 GB/s): ~1 ms saved, ~7% of
+the 13.9 ms real graphed step. The remaining ~5 ms is unfused elementwise/norm/rotary/attention work in HF eager code; capturing
+it needs torch.compile (segfaults here, see above) or hand-written fused kernels. Neither is implemented; QKV fusion is not shipped.
