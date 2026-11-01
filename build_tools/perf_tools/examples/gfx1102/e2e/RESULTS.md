@@ -60,7 +60,9 @@ loss on repeated text 0.03640 vs 0.03641; generated paragraph identical; 64 gree
 1. `torch.compile(model.forward, mode="reduce-overhead")` with HF `cache_implementation="static"`: inductor warns
    "skipping cudagraphs due to mutated inputs (66 instances)", then the process segfaults (`hf_graph.py`, MODE=compile).
    HF static cache WITHOUT compile took 310 ms/token (not usable).
-2. After capturing a CUDA graph of a StaticCache decode step, running an eager prefill forward on the same cache faults:
-   `HSA_STATUS_ERROR_EXCEPTION ... hardware exception code 0x1016` / `hipErrorLaunchFailure` (all 4 profile/fast_linear combos,
-   `hf_cg.py`). Replaying the graph without the re-prefill works (`hf_cg2.py`). Root cause not found; candidate for an upstream bug report.
+2. After capturing a CUDA graph of a StaticCache decode step, an eager prefill on the same cache faulted
+   (`HSA_STATUS_ERROR_EXCEPTION ... 0x1016`, `hipErrorLaunchFailure`) with all 4 profile/fast_linear combinations (`hf_cg.py`),
+   while replaying without the re-prefill works (`hf_cg2.py`). A minimal capture-then-eager repro (`repro_a.py`: GEMV +
+   index_copy_ graph, then eager GEMM / SDPA, then replay) does NOT fault, so this is UNPROVEN as a stack bug and may be misuse of
+   HF's cache API in `hf_cg.py` (e.g. host-side cache state across capture). Not reported upstream; needs root-causing first.
 Note: fast_linear copies the weight, so models with tied embeddings (e.g. Qwen) keep one extra copy of the head; TinyLlama is untied.
