@@ -110,3 +110,33 @@ Bugs found and fixed while building it (so earlier token-equality checks were we
   a script bug (cache state), not a stack bug. Still not root-caused.
 - A reference with `min_new_tokens` suppresses EOS and `repetition_penalty` (Qwen's default 1.05) alters tokens: compare with both neutralized.
 Limits: batch 1, greedy only, models using `StaticCache` + `cache_position`; two architectures tested; one GPU.
+
+## Batched decode (`GraphedDecoder(max_batch=N)`) and decode-shape tuning (`fast_tune`)
+`fast_decode.GraphedDecoder` now takes batches with left padding (`attention_mask`; static mask/position buffers live inside the graph).
+Correctness (`fd_batch_test.py`): batches of 1, 2 and 4 prompts of different lengths match per-prompt unbatched HF `generate` token for token
+(32 new tokens, greedy, `repetition_penalty=1.0`), for TinyLlama and Qwen2.5-0.5B, eager, graphed, and with the full fork config (compile + graph + fast_linear +
+fused attention + tuned GEMMs).
+
+Throughput vs HF batched `generate` (`fd_batch_speed.py`, 512-token prompts, 64 steps, both with fused attention on, single session):
+| model / batch | stock ms/step (tok/s) | fork, untuned ms/step (tok/s) | fork + `fast_tune` ms/step (tok/s) | tuned vs stock |
+|---|---|---|---|---|
+| TinyLlama B=1 | 23.5 (43) | 10.8 (93) | 10.9 (92) | 2.2x |
+| TinyLlama B=2 | 28.0 (72) | 17.9-18.8 (106-112) | 12.65 (158) | 2.2x |
+| TinyLlama B=4 | 27.9 (144) | 19.2-19.7 (203-208) | 14.3 (279) | 1.9x |
+| TinyLlama B=8 | 27.8 (288) | 23.6-23.7 (338-339) | 19.1 (418) | 1.45x |
+| Qwen2.5-0.5B B=1 | 27.4 (37) | 6.5-6.7 (154) | 6.7 (149) | 4.1x |
+| Qwen2.5-0.5B B=2 | 30.3 (66) | 12.3-13.0 (154-163) | 7.65 (261) | 4.0x |
+| Qwen2.5-0.5B B=4 | 30.8 (130) | 13.5-14.0 (285-296) | 8.7 (461) | 3.5x |
+| Qwen2.5-0.5B B=8 | 31.0 (258) | 15.5-15.9 (503-515) | 10.7 (748) | 2.9x |
+
+Why batch 2+ was slow: at M = 2..16 rows the default GEMM choice reaches only ~135 GB/s on the FFN down-projection (K=5632,N=2048: 170 us versus 91 us at M=1;
+`smallm.py`). TunableOp finds hipBLASLt solutions that restore ~253 GB/s (91 us). rocBLAS-only tuning does NOT help (`PYTORCH_TUNABLEOP_HIPBLASLT_ENABLED=0`:
+no change); the whole gain comes from hipBLASLt solutions. `fast_tune.tune_decode` tunes exactly the decode shapes of a model (~1.5 min), `load_tuning` loads them.
+Tuning files are specific to GPU, library versions and model shapes.
+
+### Stack bug found (reproducible, no HF involved): hipBLASLt handle creation during graph capture
+A TunableOp-selected hipBLASLt GEMM warmed up on a stream, then captured with the default `torch.cuda.graph(g)`, fails with
+`Hip error: 'operation not permitted when stream is capturing'(900) at hipblaslt.cpp:169` and then the process HANGS (`lt_capture.py main_stream_warm|side_stream_warm`).
+Line 169 is the `hipMalloc` in hipBLASLt's handle-creation code (the source comment says handle creation allocates so the matmul path never does). Handles are
+created per stream, and `torch.cuda.graph` captures on a fresh private stream. Workaround (used by `GraphedDecoder`): warm up and capture on the SAME stream
+(`torch.cuda.graph(g, stream=s)`, `lt_capture.py same_stream_warm_and_capture`). Not yet reported upstream; an error that hangs instead of failing is worth reporting.
