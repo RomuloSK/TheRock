@@ -179,17 +179,30 @@ class BenchmarkBase(ExtendedTestBase):
 
     def determine_final_status(self, final_tables: Any) -> str:
         """Determine final test status from results table(s)."""
+        if final_tables is None:
+            log.warning("No baseline comparison results are available")
+            return "UNKNOWN"
         tables = final_tables if isinstance(final_tables, list) else [final_tables]
+        if not tables:
+            log.warning("No baseline comparison results are available")
+            return "UNKNOWN"
 
         has_fail = has_unknown = False
         for table in tables:
+            if not table._rows:
+                has_unknown = True
+                continue
             if "FinalResult" not in table.field_names:
                 raise ValueError(f"Table '{table.title}' missing 'FinalResult' column")
 
             idx = table.field_names.index("FinalResult")
             results = [row[idx] for row in table._rows]
-            has_fail = has_fail or "FAIL" in results
-            has_unknown = has_unknown or "UNKNOWN" in results
+            has_fail = has_fail or any(
+                status in {"FAIL", "ERROR"} for status in results
+            )
+            has_unknown = has_unknown or any(
+                status not in {"PASS", "FAIL", "ERROR"} for status in results
+            )
 
         if has_unknown and not has_fail:
             log.warning("Some results have UNKNOWN status (no LKG data available)")
@@ -197,7 +210,7 @@ class BenchmarkBase(ExtendedTestBase):
         return "FAIL" if has_fail else ("UNKNOWN" if has_unknown else "PASS")
 
     def run(self) -> int:
-        """Execute benchmark workflow and return exit code (0=PASS, 1=FAIL)."""
+        """Run benchmarks; only a verified comparison can return exit code zero."""
         log.info(f"Initializing {self.display_name} Benchmark Test")
 
         # Run benchmarks (implemented by child class)
@@ -237,12 +250,15 @@ class BenchmarkBase(ExtendedTestBase):
             # Determine final status from LKG comparison
             final_status = self.determine_final_status(final_tables)
         else:
-            # API disabled — use pass/fail stats directly
-            final_status = stats["overall_status"]
+            # A positive raw score is not a performance comparison. Without a
+            # baseline, preserve failures but never report an unverified PASS.
+            final_status = (
+                "FAIL" if stats["overall_status"] == "FAIL" else "UNKNOWN"
+            )
 
         log.info(f"Final Status: {final_status}")
 
-        # Return 0 only if PASS, otherwise return 1
+        # UNKNOWN is not a passing performance gate.
         return 0 if final_status == "PASS" else 1
 
 
