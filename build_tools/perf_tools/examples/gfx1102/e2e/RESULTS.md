@@ -92,3 +92,21 @@ Inductor itself works on gfx1102 (`comp1.py`); the earlier segfault is specific 
 | fork graphed | 13.94 |
 | **fork compiled + graphed** | **10.99** (2 runs: 11.01, 10.99; 32 greedy tokens identical to uncompiled) |
 = 2.89x vs stock eager, 1.90x vs stock graphed. Floor from weights is ~7.6 ms. Compile warmup ~1 min per process; single-session timings.
+
+## `fast_decode.GraphedDecoder` (static cache + torch.compile + graph), validated against HF `generate`
+Helper: `build_tools/perf_tools/fast_decode.py`. Checks: `fd_test.py` (5 prompts, greedy, compared to `model.generate` with
+`repetition_penalty=1.0`, EOS allowed), `fd_speed.py` (512-token prompt, 128 new tokens).
+- Token agreement with HF generate: **100% on all 5 prompts** for TinyLlama and Qwen2.5-0.5B with the full fork config
+  (compile + graph + fast_linear + fused attention); also 100% for eager-static and graph-only variants. Also 128/128 tokens on the speed prompt.
+- Speed vs HF `generate` measured WITH fused attention already enabled in both (isolates the decode machinery):
+  TinyLlama 23.07 -> 11.03 ms/token (2.09x); Qwen2.5-0.5B 27.0 -> 6.71 ms/token (4.02x).
+  Versus true stock (fused attention off, measured earlier with the same protocol): TinyLlama 31.7 -> 11.03 (2.87x), Qwen 37.3 -> 6.71 (5.6x).
+  Single-session timings; first call compiles for ~35-45 s (TinyLlama).
+Bugs found and fixed while building it (so earlier token-equality checks were weaker than I thought):
+- The earlier `hf_cg2.py`/`hf_cg3.py` "tokens identical" checks only compared graphed variants with each other, never with HF generate.
+- HF `StaticCache` keeps per-layer position counters: reusing a cache across prompts without `cache.reset()` silently gave wrong tokens
+  (agreement 2-15%). `generate()` now resets in place (graph-safe).
+- The GPU hardware exception seen earlier did NOT reproduce with this helper (prefill after capture works), supporting the view that it was
+  a script bug (cache state), not a stack bug. Still not root-caused.
+- A reference with `min_new_tokens` suppresses EOS and `repetition_penalty` (Qwen's default 1.05) alters tokens: compare with both neutralized.
+Limits: batch 1, greedy only, models using `StaticCache` + `cache_position`; two architectures tested; one GPU.
