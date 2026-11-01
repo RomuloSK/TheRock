@@ -1,0 +1,36 @@
+{
+  "benchmark": "stock-vs-profile+fastlinear",
+  "cases": [
+    {
+      "case_id": "prefill-2048",
+      "complete_pairs": 10,
+      "confidence_level": 0.95,
+      "gate": "target",
+      "geometric_mean_speedup": 3.648795994170668,
+      "reason": "lower confidence bound meets 1.03x target",
+      "speedup_ci": [
+        3.639979538911434,
+        3.657820273323663
+      ],
+      "status": "PASS",
+      "unit": "ms"
+    },
+    {
+      "case_id": "decode-64tok",
+      "complete_pairs": 10,
+      "confidence_level": 0.95,
+      "gate": "target",
+      "geometric_mean_speedup": 1.8752926725732613,
+      "reason": "lower confidence bound meets 1.03x target",
+      "speedup_ci": [
+        1.8733127664321911,
+        1.877580326389824
+      ],
+      "status": "PASS",
+      "unit": "ms"
+    }
+  ],
+  "overall_status": "PASS",
+  "schema_version": 1,
+  "spec_sha256": "1e360cddacf18e8d838aa2c96c34d90a82ef37bf548549019631a448b91ffb42"
+}

@@ -1,0 +1,128 @@
+{
+ "schema_version": 1,
+ "benchmark": "profile-vs-profile+fastlinear",
+ "pairs": 10,
+ "minimum_pairs": 10,
+ "warmups": 1,
+ "seed": 91,
+ "timeout_seconds": 600,
+ "confidence_level": 0.95,
+ "bootstrap_samples": 5000,
+ "minimum_speedup": 1.03,
+ "maximum_regression": 1.03,
+ "working_directory": ".",
+ "record_environment": [
+  "TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL"
+ ],
+ "context": {
+  "gpu_target": "gfx1102",
+  "rocm": "10.1.0",
+  "torch": "2.14.0+rocm10.1.0",
+  "model": "8-layer d2048 h16 ff8192 fp16 (~0.5B), ctx 2048"
+ },
+ "environment": {},
+ "cases": [
+  {
+   "id": "prefill-2048",
+   "gate": "target",
+   "direction": "lower",
+   "unit": "ms",
+   "metric": {
+    "source": "json_stdout",
+    "field": "latency_ms"
+   },
+   "baseline": {
+    "command": [
+     "python",
+     "/home/romuloborges/projects/ROCm/therock-perf-implementation/build_tools/perf_tools/rocm_perf_profile.py",
+     "--",
+     "python",
+     "llm_bench.py",
+     "--mode",
+     "prefill"
+    ],
+    "correctness_command": [
+     "python",
+     "/home/romuloborges/projects/ROCm/therock-perf-implementation/build_tools/perf_tools/rocm_perf_profile.py",
+     "--",
+     "python",
+     "llm_bench.py",
+     "--check"
+    ]
+   },
+   "candidate": {
+    "command": [
+     "python",
+     "/home/romuloborges/projects/ROCm/therock-perf-implementation/build_tools/perf_tools/rocm_perf_profile.py",
+     "--",
+     "python",
+     "llm_bench.py",
+     "--mode",
+     "prefill"
+    ],
+    "correctness_command": [
+     "python",
+     "/home/romuloborges/projects/ROCm/therock-perf-implementation/build_tools/perf_tools/rocm_perf_profile.py",
+     "--",
+     "python",
+     "llm_bench.py",
+     "--check"
+    ],
+    "environment": {
+     "FAST_LINEAR": "1"
+    }
+   }
+  },
+  {
+   "id": "decode-64tok",
+   "gate": "target",
+   "direction": "lower",
+   "unit": "ms",
+   "metric": {
+    "source": "json_stdout",
+    "field": "latency_ms"
+   },
+   "baseline": {
+    "command": [
+     "python",
+     "/home/romuloborges/projects/ROCm/therock-perf-implementation/build_tools/perf_tools/rocm_perf_profile.py",
+     "--",
+     "python",
+     "llm_bench.py",
+     "--mode",
+     "decode"
+    ],
+    "correctness_command": [
+     "python",
+     "/home/romuloborges/projects/ROCm/therock-perf-implementation/build_tools/perf_tools/rocm_perf_profile.py",
+     "--",
+     "python",
+     "llm_bench.py",
+     "--check"
+    ]
+   },
+   "candidate": {
+    "command": [
+     "python",
+     "/home/romuloborges/projects/ROCm/therock-perf-implementation/build_tools/perf_tools/rocm_perf_profile.py",
+     "--",
+     "python",
+     "llm_bench.py",
+     "--mode",
+     "decode"
+    ],
+    "correctness_command": [
+     "python",
+     "/home/romuloborges/projects/ROCm/therock-perf-implementation/build_tools/perf_tools/rocm_perf_profile.py",
+     "--",
+     "python",
+     "llm_bench.py",
+     "--check"
+    ],
+    "environment": {
+     "FAST_LINEAR": "1"
+    }
+   }
+  }
+ ]
+}

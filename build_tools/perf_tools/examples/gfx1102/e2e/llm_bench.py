@@ -20,6 +20,9 @@ class LM(nn.Module):
         for i,b in enumerate(s.b): x,kv=b(x,None if kvs is None else kvs[i]); new.append(kv)
         return s.h(x),new
 torch.manual_seed(0); m=LM(a.layers).to(dev,dt).eval()
+import os
+if os.environ.get('FAST_LINEAR')=='1':
+    sys.path.insert(0,'/home/romuloborges/projects/ROCm/therock-perf-implementation/build_tools/perf_tools'); from fast_linear import convert; convert(m)
 ids=torch.randint(0,V,(1,a.ctx),device=dev)
 @torch.no_grad()
 def run():

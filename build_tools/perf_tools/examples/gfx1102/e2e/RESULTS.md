@@ -30,3 +30,18 @@ Limits: random weights, one model shape, one GPU, forward only (no backward/trai
 - Training smoke (4-layer d512, AdamW, autocast fp16, 60 steps): loss 7.7845 -> 4.8680 (stock) vs 4.8689 (profile);
   step time 90.6 ms -> 50.3 ms (1.8x, single run).
 Not covered: dropout statistics, long-context (>8k) numerics, multi-epoch convergence, other gfx11 parts (only gfx1102 tested).
+
+## fast_linear: pre-transposed weights for inference (added)
+Stock `F.linear` ([out,in] weight) at M=1 reaches only 110-200 GB/s on this card; `x @ W_t` with an [in,out] layout reaches
+250-275 GB/s (K=2048,N=6144: 2.24x; N=8192: 1.53x; K=8192,N=2048: 1.29x; head N=32000: 1.51x). A Triton GEMV (`gemv.py`)
+gave no further gain: plain `x @ w` was already ~265-275 GB/s, so the loss was the layout, not the kernel.
+`fast_linear.convert(model)` swaps each nn.Linear for an [in,out]-layout copy (state_dict stays standard; 6 unit tests).
+
+Paired, 10 pairs, correctness gate on every run (`fl-report.json`, `both-report.json`):
+| comparison | prefill 2048 | decode/token |
+|---|---|---|
+| profile + fast_linear vs profile only | 1.200x [1.198, 1.203] | 1.289x [1.288, 1.290] |
+| **profile + fast_linear vs stock** | **3.649x** [3.640, 3.658] | **1.875x** [1.873, 1.878] |
+Absolute: prefill 312.8 -> ~86 ms; decode 11.9 -> ~6.4 ms/token.
+Caveat: INFERENCE ONLY. Training step (4-layer d512): loss identical (4.8688 vs 4.8689) but 50.5 -> 55.7 ms (10% slower),
+so `convert()` warns in training mode. Memory is unchanged (weights are replaced, not duplicated).
