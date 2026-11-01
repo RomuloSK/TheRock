@@ -8,10 +8,11 @@ torch is imported. Never overrides a variable the user already set.
     python rocm_perf_profile.py -- python my_script.py     # launcher
     import rocm_perf_profile; rocm_perf_profile.apply()     # before `import torch`
 
-Profiles (selected by GPU architecture, detected without importing torch):
-  gfx11 (RDNA3): enable fused (AOTriton) scaled-dot-product attention. Measured on
-  gfx1102 / ROCm 10.1.0: 8-23x faster attention vs the unfused math fallback, with
-  fp16 error equal to the math path (forward only; see experiments/EXPERIMENTS.md).
+Profile (selected by GPU architecture, detected without importing torch):
+  gfx1102 (validated): enable fused (AOTriton) scaled-dot-product attention. Measured on
+  gfx1102 / ROCm 10.1.0: 8-23x faster attention vs the unfused math fallback, forward+backward
+  checked against fp64 (see examples/gfx1102/). gfx1101/1150/1151/1200 are gated by the same flag in
+  PyTorch but untested here: set ROCM_PERF_INCLUDE_UNVALIDATED=1 to include them at your own risk.
 Use --dry-run / `describe()` to see what would be set. Set ROCM_PERF_PROFILE=0 to disable.
 """
 import os
@@ -20,9 +21,11 @@ import shutil
 import subprocess
 import sys
 
-PROFILES = {
-    "gfx11": {"TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL": "1"},
-}
+FUSED_ATTENTION = {"TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL": "1"}
+# Exact architectures for which PyTorch 2.14+rocm10.1.0 gates fused (AOTriton) SDPA behind the flag
+# (torch/testing/_internal/common_cuda.py). gfx1100 is already enabled by default, so it is a no-op.
+VALIDATED = ("gfx1102",)                                      # measured and checked in this repo
+GATED_UNVALIDATED = ("gfx1101", "gfx1150", "gfx1151", "gfx1200")  # same gate, NOT tested here
 
 
 def detect_arches(environ=None):
@@ -50,19 +53,15 @@ def detect_arches(environ=None):
     return sorted(set(re.findall(r"^\s*Name:\s+(gfx[0-9a-f]+)\s*$", out, re.M)))
 
 
-def settings_for(arches):
-    result = {}
-    for arch in arches:
-        for prefix, env in PROFILES.items():
-            if arch.startswith(prefix):
-                result.update(env)
-    return result
+def settings_for(arches, include_unvalidated=False):
+    targets = VALIDATED + (GATED_UNVALIDATED if include_unvalidated else ())
+    return dict(FUSED_ATTENTION) if any(a in targets for a in arches) else {}
 
 
 def describe(environ=None):
     environ = os.environ if environ is None else environ
     arches = detect_arches(environ)
-    wanted = settings_for(arches)
+    wanted = settings_for(arches, environ.get("ROCM_PERF_INCLUDE_UNVALIDATED") == "1")
     return {"arches": arches,
             "would_set": {k: v for k, v in wanted.items() if k not in environ},
             "user_overrides": {k: environ[k] for k in wanted if k in environ}}

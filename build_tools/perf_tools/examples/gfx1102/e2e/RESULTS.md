@@ -9,7 +9,7 @@ Paired harness, 10 pairs, randomized order, 95% bootstrap CI, correctness gate o
 | prefill 2048 tokens | 312.8 ms (6.5k tok/s) | 102.5 ms (20.0k tok/s) | **3.04x** [3.035, 3.044] |
 | decode (dynamic KV cat) | 11.9 ms/token | 8.2 ms/token | **1.45x** [1.452, 1.455] |
 
-The profile only sets `TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1` on gfx11 (before torch import); it never overrides a
+The profile only sets `TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1` on gfx1102 (the exact arch tested; PyTorch gates gfx1101/1102/1150/1151/1200 behind this flag, gfx1100 is already on) (before torch import); it never overrides a
 user setting. No library was rebuilt: the fork's contribution is the detection, safety rules, tests and measurement.
 
 ## Follow-ups measured (single runs, no CI)

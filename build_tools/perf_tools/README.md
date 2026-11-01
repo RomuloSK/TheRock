@@ -17,7 +17,7 @@ Send verbose diagnostics to stderr.
 
 ## Runtime profile
 
-`rocm_perf_profile.py -- <command>` enables fused attention on gfx11 for stock PyTorch wheels (see `examples/gfx1102/e2e/RESULTS.md`: 3.0x prefill, 1.45x decode on RX 7600). `--dry-run` shows what it would set; `ROCM_PERF_PROFILE=0` disables it.
+`rocm_perf_profile.py -- <command>` enables fused attention on gfx1102 (validated; other gated gfx11xx/gfx1200 parts opt-in) for stock PyTorch wheels (see `examples/gfx1102/e2e/RESULTS.md`: 3.0x prefill, 1.45x decode on RX 7600). `--dry-run` shows what it would set; `ROCM_PERF_PROFILE=0` disables it.
 
 ## Spec
 
